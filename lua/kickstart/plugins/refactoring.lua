@@ -1,0 +1,26 @@
+return {
+  'ThePrimeagen/refactoring.nvim',
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    'nvim-treesitter/nvim-treesitter',
+  },
+  opts = {
+    prompt_func_return_type = {
+      go = true,
+    },
+  },
+  keys = {
+    {
+      '<leader>lR',
+      function()
+        require('telescope').extensions.refactoring.refactors()
+      end,
+      desc = 'Refactoring',
+      mode = { 'n', 'x' },
+    },
+  },
+  config = function(_, opts)
+    require('refactoring').setup(opts)
+    require('telescope').load_extension 'refactoring'
+  end,
+}

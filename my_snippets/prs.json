@@ -1,0 +1,51 @@
+{
+  "❔ question": {
+    "prefix": "prq",
+    "body": [
+      "<!-- Questions are appropriate if you have a potential concern but are not quite sure if it's relevant or not. Asking the author for clarification or investigation can lead to a quick resolution.  -->",
+      "**❔ question:** $0"
+    ]
+  },
+  "🎯 suggestion": {
+    "prefix": "prs",
+    "body": [
+      "<!-- Suggestions are specific requests to improve the subject under review. It is assumed that we all want to do what's best, so these comments are never dismissed as “mere suggestions”, but are taken seriously.  -->",
+      "**🎯 suggestion:** $0"
+    ]
+  },
+  "👏 praise": {
+    "prefix": "prp",
+    "body": [
+      "<!-- Praises highlight something positive. Try to leave at least one of these comments per review (if it exists :^)  -->",
+      "**👏 praise:** $0"
+    ]
+  },
+  "💣 chore": {
+    "prefix": "prc",
+    "body": [
+      "<!-- Chores are simple tasks that must be done before the subject can be “officially” accepted. Usually, these comments reference some common process. Try to leave a link to the process description so that the reader knows how to resolve the chore.  -->",
+      "**💣 chore:** $0"
+    ]
+  },
+  "💭 thought": {
+    "prefix": "prt",
+    "body": [
+      "<!-- Thoughts represent an idea that popped up from reviewing. These comments are non-blocking by nature, but they are extremely valuable and can lead to more focused initiatives and mentoring opportunities.  -->",
+      "**💭 thought:** $0"
+    ]
+  },
+  "🔨 issue": {
+    "prefix": "pri",
+    "body": [
+      "<!-- Issues represent user-facing problems. If possible, it's great to follow this kind of comment with a suggestion.  -->",
+      "**🔨 issue:** $0"
+    ]
+  },
+  "🤓 nitpick": {
+    "prefix": "prn",
+    "body": [
+      "<!-- Nitpicks are small, trivial, but necessary changes. Distinguishing nitpick comments significantly helps direct the reader's attention to comments requiring more involvement.  -->",
+      "**🤓 nitpick:** $0"
+    ]
+  }
+}
