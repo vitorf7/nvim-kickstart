@@ -18,12 +18,12 @@ vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
   end,
 })
 
-vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
-  pattern = { '*.go', 'go.mod', 'go.sum' },
-  callback = function()
-    vim.lsp.codelens.refresh()
-  end,
-})
+-- vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
+--   pattern = { '*.go', 'go.mod', 'go.sum' },
+--   callback = function()
+--     vim.lsp.codelens.refresh()
+--   end,
+-- })
 
 vim.api.nvim_create_autocmd('BufWritePost', {
   pattern = { '*tmux.conf' },

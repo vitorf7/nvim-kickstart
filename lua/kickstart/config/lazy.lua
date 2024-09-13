@@ -26,6 +26,9 @@ vim.cmd [[command! -nargs=0 GenNvim :Gen]]
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup {
+  ui = {
+    backdrop = 100,
+  },
   spec = {
     { import = 'kickstart.plugins' },
   },

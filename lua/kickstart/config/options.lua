@@ -1,5 +1,13 @@
 local opt = vim.opt
 
+vim.filetype.add {
+  extension = {
+    jinja = 'jinja',
+    jinja2 = 'jinja',
+    j2 = 'jinja',
+  },
+}
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -107,3 +115,13 @@ vim.o.winblend = 0
 
 -- Turn ON editorcofig functionality
 vim.g.editorconfig = true
+
+-- UFO
+vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+vim.o.foldcolumn = '1' -- '0' is not bad
+vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+
+-- Hardtime cmd height
+vim.o.cmdheight = 2
