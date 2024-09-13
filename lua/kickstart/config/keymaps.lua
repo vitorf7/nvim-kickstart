@@ -32,10 +32,23 @@ keymap('t', '<C-/>', '<cmd>close<cr>', { desc = 'Hide Terminal' })
 keymap('t', '<c-_>', '<cmd>close<cr>', { desc = 'which_key_ignore' })
 
 -- Diagnostic keymaps
+keymap('n', '<leader>de', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+keymap('n', '[q', vim.cmd.cprev, { desc = 'Previous [Q]uickfix' })
+keymap('n', ']q', vim.cmd.cnext, { desc = 'Next [Q]uickfix' })
 keymap('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 keymap('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-keymap('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
-keymap('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+keymap('n', '[e', function()
+  vim.diagnostic.goto_prev { severity = vim.diagnostic.severity[vim.diagnostic.severity.ERROR] }
+end, { desc = 'Go to press Diagnostic [E]rror' })
+keymap('n', ']e', function()
+  vim.diagnostic.goto_next { severity = vim.diagnostic.severity[vim.diagnostic.severity.ERROR] }
+end, { desc = 'Go to next Diagnostic [E]rror' })
+keymap('n', '[w', function()
+  vim.diagnostic.goto_prev { severity = vim.diagnostic.severity[vim.diagnostic.severity.WARN] }
+end, { desc = 'Go to press Diagnostic [W]arning' })
+keymap('n', ']w', function()
+  vim.diagnostic.goto_next { severity = vim.diagnostic.severity[vim.diagnostic.severity.WARN] }
+end, { desc = 'Go to next Diagnostic [W]arning' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -72,7 +85,7 @@ keymap('n', '<C-Space>', ":lua require'nvim-tmux-navigation'.NvimTmuxNavigateNex
 -- Save buffer
 keymap('n', '<C-s>', ':w!<CR>', opts)
 keymap('n', '<C-S-s>', ':wa!<CR>', opts)
-keymap('n', '<leader>w', ':w!<CR>', opts)
+keymap('n', '<leader>w', ':w!<CR>', vim.tbl_extend('force', opts, { desc = 'Save buffer' }))
 
 -- Move text up and down
 keymap('n', '<A-j>', '<Esc>:m .+1<CR>==gi', opts)
@@ -101,3 +114,6 @@ keymap('x', 'J', ":move '>+1<CR>gv-gv", opts)
 keymap('x', 'K', ":move '<-2<CR>gv-gv", opts)
 keymap('x', '<A-j>', ":move '>+1<CR>gv-gv", opts)
 keymap('x', '<A-k>', ":move '<-2<CR>gv-gv", opts)
+
+-- Close all buffers except current
+keymap('n', '<leader>q', ':%bd|e#|bd#<cr>', vim.tbl_extend('force', opts, { desc = 'Close all buffers except current' }))
