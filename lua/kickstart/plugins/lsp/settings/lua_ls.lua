@@ -1,8 +1,5 @@
 local ih = require 'inlay-hints'
 return {
-  -- cmd = {...},
-  -- filetypes { ...},
-  -- capabilities = {},
   settings = {
     Lua = {
       runtime = { version = 'LuaJIT' },

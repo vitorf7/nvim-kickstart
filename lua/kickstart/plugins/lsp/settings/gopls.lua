@@ -1,4 +1,3 @@
-local ih = require 'inlay-hints'
 return {
   on_attach = require('util').lsp.on_attach(function(client, bufnr)
     if client.name == 'gopls' then
@@ -14,11 +13,6 @@ return {
         }
       end
     end
-    if client.server_capabilities.codeLensProvider then
-      local _, _ = pcall(vim.lsp.codelens.refresh)
-    end
-
-    ih.on_attach(client, bufnr)
   end),
   -- capabilities = opts.capabilities,
   settings = {
