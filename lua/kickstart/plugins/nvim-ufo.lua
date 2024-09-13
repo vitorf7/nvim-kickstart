@@ -28,7 +28,6 @@ end
 
 return {
   'kevinhwang91/nvim-ufo',
-  enabled = true,
   dependencies = { 'kevinhwang91/promise-async' },
   event = 'BufRead',
   keys = {
@@ -55,14 +54,11 @@ return {
     },
   },
   config = function()
-    vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
-    vim.o.foldcolumn = '1'
-    vim.o.foldlevel = 99
-    vim.o.foldlevelstart = 100
-    vim.o.foldenable = true
     require('ufo').setup {
       fold_virt_text_handler = handler,
-      close_fold_kinds = { 'imports' },
+      close_fold_kinds_for_ft = {
+        default = { 'imports' },
+      },
     }
   end,
 }

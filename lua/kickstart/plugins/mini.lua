@@ -7,7 +7,19 @@ return { -- Collection of various small independent plugins/modules
     --  - va)  - [V]isually select [A]round [)]parenthen
     --  - yinq - [Y]ank [I]nside [N]ext [']quote
     --  - ci'  - [C]hange [I]nside [']quote
-    require('mini.ai').setup { n_lines = 500 }
+    local mini_ai = require 'mini.ai'
+    mini_ai.setup {
+      n_lines = 500,
+      custom_textobjects = {
+        o = mini_ai.gen_spec.treesitter({
+          a = { '@block.outer', '@conditional.outer', '@loop.outer' },
+          i = { '@block.inner', '@conditional.inner', '@loop.inner' },
+        }, {}),
+        f = mini_ai.gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }, {}),
+        c = mini_ai.gen_spec.treesitter({ a = '@class.outer', i = '@class.inner' }, {}),
+        t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },
+      },
+    }
 
     -- Add/delete/replace surroundings (brackets, quotes, etc.)
     --
@@ -27,11 +39,26 @@ return { -- Collection of various small independent plugins/modules
     -- cursor information because line numbers are already enabled
     ---@diagnostic disable-next-line: duplicate-set-field
     statusline.section_location = function()
-      return ''
+      return '%2l:%-2v'
     end
 
     local mini_pairs = require 'mini.pairs'
     mini_pairs.setup()
+
+    local mini_icons = require 'mini.icons'
+    mini_icons.setup {
+      file = {
+        ['.eslintrc.js'] = { glyph = '󰱺', hl = 'MiniIconsYellow' },
+        ['.node-version'] = { glyph = '', hl = 'MiniIconsGreen' },
+        ['.prettierrc'] = { glyph = '', hl = 'MiniIconsPurple' },
+        ['.yarnrc.yml'] = { glyph = '', hl = 'MiniIconsBlue' },
+        ['eslint.config.js'] = { glyph = '󰱺', hl = 'MiniIconsYellow' },
+        ['package.json'] = { glyph = '', hl = 'MiniIconsGreen' },
+        ['tsconfig.json'] = { glyph = '', hl = 'MiniIconsAzure' },
+        ['tsconfig.build.json'] = { glyph = '', hl = 'MiniIconsAzure' },
+        ['yarn.lock'] = { glyph = '', hl = 'MiniIconsBlue' },
+      },
+    }
 
     -- ... and there is more!
     --  Check out: https://github.com/echasnovski/mini.nvim

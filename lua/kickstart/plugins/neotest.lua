@@ -1,9 +1,22 @@
 return {
   'nvim-neotest/neotest',
   dependencies = {
+    { 'nvim-neotest/nvim-nio' },
     { 'nvim-lua/plenary.nvim' },
+    { 'antoinemadec/FixCursorHold.nvim' },
+    { 'nvim-treesitter/nvim-treesitter' },
     { 'nvim-neotest/neotest-plenary' },
-    { 'nvim-neotest/neotest-go' },
+    -- { 'nvim-neotest/neotest-go' },
+    {
+      'fredrikaverpil/neotest-golang',
+      dependencies = {
+        {
+          'leoluz/nvim-dap-go',
+          opts = {},
+        },
+      },
+      branch = 'main',
+    },
     { 'haydenmeade/neotest-jest' },
   },
   opts = {
@@ -13,11 +26,16 @@ return {
     -- The adapter will then be automatically loaded with the config.
     adapters = {
       'neotest-plenary',
-      ['neotest-go'] = {
-        experimental = {
-          test_table = true,
-        },
-        args = { '-count=1', '-timeout=60s' },
+      -- ['neotest-go'] = {
+      --   experimental = {
+      --     test_table = true,
+      --   },
+      --   args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
+      -- },
+      ['neotest-golang'] = {
+        go_test_args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
+        dap_go_enabled = true,
+        testify_enabled = true,
       },
       ['neotest-jest'] = {
         jestcommand = 'npm test --',

@@ -8,5 +8,6 @@ return {
 
   keys = {
     { '<leader>uy', '<cmd>Yazi<CR>', desc = '[U]I: Toggle [Y]azi' },
+    { '<leader>E', '<cmd>Yazi<CR>', desc = 'UI: Toggle Yazi [E]xplorer' },
   },
 }

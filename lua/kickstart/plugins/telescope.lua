@@ -25,8 +25,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
       config = function() end,
       dependencies = {
         'kkharji/sqlite.lua',
-        -- Only required if using match_algorithm fzf
-        { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+        -- Only required if using match_algorithm fzy
+        { 'nvim-telescope/telescope-fzy-native.nvim' },
       },
     },
     'joshmedeski/telescope-smart-goto.nvim',
@@ -35,6 +35,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
     --  If you already have a Nerd Font, or terminal set up with fallback fonts
     --  you can enable this
     { 'nvim-tree/nvim-web-devicons' },
+    { 'ANGkeith/telescope-terraform-doc.nvim' },
   },
   config = function()
     -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -144,6 +145,8 @@ return { -- Fuzzy Finder (files, lsp, etc)
     pcall(require('telescope').load_extension, 'ui-select')
     pcall(require('telescope').load_extension, 'smart_goto')
     pcall(require('telescope').load_extension, 'harpoon')
+    pcall(require('telescope').load_extension, 'notify')
+    pcall(require('telescope').load_extension, 'terraform_doc')
 
     -- See `:help telescope.builtin`
     local builtin = require 'telescope.builtin'

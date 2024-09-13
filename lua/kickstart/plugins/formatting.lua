@@ -2,13 +2,19 @@ return { -- Autoformat
   'stevearc/conform.nvim',
   opts = {
     notify_on_error = true,
-    format_on_save = {
-      timeout_ms = 500,
-      lsp_fallback = true,
-    },
+    format_on_save = function(bufnr)
+      -- Disable "format_on_save lsp_fallback" for languages that don't
+      -- have a well standardized coding style. You can add additional
+      -- languages here or re-enable it for the disabled ones.
+      local disable_filetypes = { c = true, cpp = true }
+      return {
+        timeout_ms = 500,
+        lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+      }
+    end,
     formatters_by_ft = {
       lua = { 'stylua' },
-      go = { 'goimports', 'goimports', 'golines' },
+      go = { 'goimports', 'gci', 'gofumpt', 'golines' },
       toml = { 'taplo' },
       sql = { 'sql_formatter' },
       mysql = { 'sql_formatter' },
@@ -16,6 +22,30 @@ return { -- Autoformat
       terraform = { 'terraform_fmt' },
       tf = { 'terraform_fmt' },
       ['terraform-vars'] = { 'terraform_fmt' },
+      -- local supported = {
+      --   "css",
+      --   "graphql",
+      --   "handlebars",
+      --   "html",
+      --   "javascript",
+      --   "javascriptreact",
+      --   "json",
+      --   "jsonc",
+      --   "less",
+      --   "markdown",
+      --   "markdown.mdx",
+      --   "scss",
+      --   "typescript",
+      --   "typescriptreact",
+      --   "vue",
+      --   "yaml",
+      -- }
+      graphql = { 'prettierd' },
+      javascript = { 'prettierd' },
+      javascriptreact = { 'prettierd' },
+      typescript = { 'prettierd' },
+      typescriptreact = { 'prettierd' },
+
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
@@ -24,6 +54,10 @@ return { -- Autoformat
       -- javascript = { { "prettierd", "prettier" } },
     },
     formatters = {
+      gci = {
+        command = 'gci',
+        args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default', '-s', 'prefix(github.com/utilitywarehouse)', '$FILENAME' },
+      },
       golines = {
         args = { '--base-formatter=gofumpt', '--ignore-generated', '--max-len=140' },
       },

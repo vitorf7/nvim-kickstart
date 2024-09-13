@@ -5,18 +5,18 @@ return { -- Useful plugin to show you pending keybinds.
     require('which-key').setup()
 
     -- Document existing key chains
-    require('which-key').register {
-      ['<leader>A'] = { name = '[A]I', _ = 'which_key_ignore' },
-      ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-      ['<leader>d'] = { name = '[D]ebug', _ = 'which_key_ignore' },
-      ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-      ['<leader>gw'] = { name = '[G]it [W]orktrees', _ = 'which_key_ignore' },
-      ['<leader>l'] = { name = '[L]SP', _ = 'which_key_ignore' },
-      ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-      ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-      ['<leader>t'] = { name = '[T]est', _ = 'which_key_ignore' },
-      ['<leader>u'] = { name = '[U]I', _ = 'which_key_ignore' },
-      ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+    require('which-key').add {
+      { '<leader>A', group = '[A]I' },
+      { '<leader>c', group = '[C]ode' },
+      { '<leader>d', group = '[D]ebug' },
+      { '<leader>g', group = '[G]it' },
+      { '<leader>gw', group = '[G]it [W]orktrees' },
+      { '<leader>l', group = '[L]SP' },
+      { '<leader>r', group = '[R]ename' },
+      { '<leader>s', group = '[S]earch' },
+      { '<leader>t', group = '[T]est' },
+      { '<leader>u', group = '[U]I' },
+      { '<leader>w', group = '[W]orkspace' },
     }
   end,
 }

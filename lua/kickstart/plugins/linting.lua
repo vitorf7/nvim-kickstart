@@ -8,6 +8,7 @@ return {
       dockerfile = { 'hadolint' },
       terraform = { 'terraform_validate' },
       tf = { 'terraform_validate' },
+      yaml = { 'yamllint' },
     }
   end,
 }

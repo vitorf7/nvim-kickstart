@@ -38,6 +38,8 @@ return {
     end
   end,
   opts = {
+    enable_git_status = true,
+    enable_diagnostics = true,
     sources = { 'filesystem', 'buffers', 'git_status', 'document_symbols' },
     open_files_do_not_replace_types = { 'terminal', 'Trouble', 'qf', 'Outline' },
     filesystem = {
@@ -57,9 +59,29 @@ return {
         expander_expanded = '',
         expander_highlight = 'NeoTreeExpander',
       },
+      diagnostics = {
+        symbols = {
+          hint = Util.icons.diagnostics.Hint,
+          info = Util.icons.diagnostics.Info,
+          warn = Util.icons.diagnostics.Warn,
+          error = Util.icons.diagnostics.Error,
+        },
+        highlights = {
+          hint = 'DiagnosticSignHint',
+          info = 'DiagnosticSignInfo',
+          warn = 'DiagnosticSignWarn',
+          error = 'DiagnosticSignError',
+        },
+      },
     },
   },
   config = function(_, opts)
+    -- If you want icons for diagnostic errors, you'll need to define them somewhere:
+    vim.fn.sign_define('DiagnosticSignError', { text = Util.icons.diagnostics.Error, texthl = 'DiagnosticSignError' })
+    vim.fn.sign_define('DiagnosticSignWarn', { text = Util.icons.diagnostics.Warn, texthl = 'DiagnosticSignWarn' })
+    vim.fn.sign_define('DiagnosticSignInfo', { text = Util.icons.diagnostics.Info, texthl = 'DiagnosticSignInfo' })
+    vim.fn.sign_define('DiagnosticSignHint', { text = Util.icons.diagnostics.Hint, texthl = 'DiagnosticSignHint' })
+
     local function on_move(data)
       Util.lsp.on_rename(data.source, data.destination)
     end

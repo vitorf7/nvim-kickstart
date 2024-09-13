@@ -12,6 +12,11 @@ return {
   },
   opts = function()
     local opts = {
+      options = {
+        right = {
+          size = 40,
+        },
+      },
       bottom = {
         {
           ft = 'toggleterm',
@@ -29,7 +34,7 @@ return {
         },
         {
           ft = 'lazyterm',
-          title = 'LazyTerm',
+          title = 'Terminal',
           size = { height = 0.4 },
           filter = function(buf)
             return not vim.b[buf].lazyterm_cmd
@@ -51,8 +56,8 @@ return {
             return vim.bo[buf].buftype == 'help'
           end,
         },
-        { title = 'Spectre', ft = 'spectre_panel', size = { height = 0.4 } },
         { title = 'Neotest Output', ft = 'neotest-output-panel', size = { height = 15 } },
+        { title = 'Spectre', ft = 'spectre_panel', size = { height = 0.4 } },
       },
       left = {
         {
@@ -65,11 +70,9 @@ return {
           open = function()
             vim.api.nvim_input '<esc><space>e'
           end,
-          size = { height = 0.5 },
         },
-        { title = 'Neotest Summary', ft = 'neotest-summary' },
-        'neo-tree',
       },
+      right = {},
       keys = {
         -- increase width
         ['<c-Right>'] = function(win)
@@ -87,6 +90,9 @@ return {
         ['<c-Down>'] = function(win)
           win:resize('height', -2)
         end,
+      },
+      animate = {
+        enabled = false,
       },
     }
     return opts
