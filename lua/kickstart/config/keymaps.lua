@@ -15,6 +15,11 @@ keymap('n', '<leader>gg', function()
   Util.terminal({ 'lazygit' }, { cwd = Util.root(), esc_esc = false, ctrl_hjkl = false })
 end, { desc = 'Lazygit (root dir)' })
 
+-- czg Git
+keymap('n', '<leader>gc', function()
+  Util.terminal({ 'czg' }, { cwd = Util.root(), esc_esc = false, ctrl_hjkl = false })
+end, { desc = 'czg (root dir)' })
+
 -- Terminal
 local lazyterm = function()
   Util.terminal(nil, { cwd = Util.root() })

@@ -33,6 +33,7 @@ return {
       --   args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
       -- },
       ['neotest-golang'] = {
+        runner = 'gotestsum',
         go_test_args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
         dap_go_enabled = true,
         testify_enabled = true,
@@ -146,7 +147,7 @@ return {
     {
       '<leader>tT',
       function()
-        require('neotest').run.run(vim.loop.cwd())
+        require('neotest').run.run(vim.fn.getcwd())
       end,
       desc = 'Run All Test Files',
     },
