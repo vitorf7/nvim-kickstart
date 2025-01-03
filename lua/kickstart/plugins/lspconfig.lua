@@ -184,6 +184,10 @@ return { -- LSP Configuration & Plugins
     require('mason-lspconfig').setup {
       handlers = {
         function(server_name)
+          if server_name == 'bufls' then
+            server_name = 'buf_ls'
+          end
+
           local server = {}
           local lsp_settings_ok, lsp_settings = pcall(require, 'kickstart.plugins.lsp.settings.' .. server_name)
           if lsp_settings_ok then

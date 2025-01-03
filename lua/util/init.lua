@@ -124,7 +124,7 @@ M.servers = {
   'intelephense',
   'terraformls',
   'tflint',
-  'bufls',
+  'buf_ls',
   'cucumber_language_server',
   'dockerls',
   'marksman',
