@@ -37,6 +37,7 @@ return {
         go_test_args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
         dap_go_enabled = true,
         testify_enabled = true,
+        colorize_test_output = true,
       },
       ['neotest-jest'] = {
         jestcommand = 'npm test --',
