@@ -11,9 +11,9 @@ vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- lazygit
-keymap('n', '<leader>gg', function()
-  Util.terminal({ 'lazygit' }, { cwd = Util.root(), esc_esc = false, ctrl_hjkl = false })
-end, { desc = 'Lazygit (root dir)' })
+-- keymap('n', '<leader>gg', function()
+--   Util.terminal({ 'lazygit' }, { cwd = Util.root(), esc_esc = false, ctrl_hjkl = false })
+-- end, { desc = 'Lazygit (root dir)' })
 
 -- czg Git
 keymap('n', '<leader>gc', function()
@@ -21,11 +21,11 @@ keymap('n', '<leader>gc', function()
 end, { desc = 'czg (root dir)' })
 
 -- Terminal
-local lazyterm = function()
-  Util.terminal(nil, { cwd = Util.root() })
-end
-keymap('n', '<c-/>', lazyterm, { desc = 'Terminal (root dir)' })
-keymap('n', '<c-_>', lazyterm, { desc = 'which_key_ignore' })
+-- local lazyterm = function()
+--   Util.terminal(nil, { cwd = Util.root() })
+-- end
+-- keymap('n', '<c-/>', lazyterm, { desc = 'Terminal (root dir)' })
+-- keymap('n', '<c-_>', lazyterm, { desc = 'which_key_ignore' })
 
 -- Terminal Mappings
 keymap('t', '<esc><esc>', '<c-\\><c-n>', { desc = 'Enter Normal Mode' })
@@ -121,4 +121,11 @@ keymap('x', '<A-j>', ":move '>+1<CR>gv-gv", opts)
 keymap('x', '<A-k>', ":move '<-2<CR>gv-gv", opts)
 
 -- Close all buffers except current
-keymap('n', '<leader>q', ':%bd|e#|bd#<cr>', vim.tbl_extend('force', opts, { desc = 'Close all buffers except current' }))
+-- keymap('n', '<leader>q', ':%bd|e#|bd#<cr>', vim.tbl_extend('force', opts, { desc = 'Close all buffers except current' }))
+-- Buffers
+keymap('n', '<C-q>', function()
+  Snacks.bufdelete.delete()
+end, vim.tbl_extend('force', opts, { desc = 'Close current buffer' }))
+keymap('n', '<leader>q', function()
+  Snacks.bufdelete.other()
+end, vim.tbl_extend('force', opts, { desc = 'Close all buffers except current' }))

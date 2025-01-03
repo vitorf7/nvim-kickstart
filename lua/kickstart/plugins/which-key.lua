@@ -6,6 +6,14 @@ return { -- Useful plugin to show you pending keybinds.
 
     -- Document existing key chains
     require('which-key').add {
+      {
+        '<leader>a',
+        function()
+          Snacks.dashboard.open()
+        end,
+        desc = 'D[a]shboard',
+      },
+
       { '<leader>A', group = '[A]I' },
       { '<leader>c', group = '[C]ode' },
       { '<leader>d', group = '[D]ebug' },
@@ -17,6 +25,15 @@ return { -- Useful plugin to show you pending keybinds.
       { '<leader>t', group = '[T]est' },
       { '<leader>u', group = '[U]I' },
       { '<leader>w', group = '[W]orkspace' },
+
+      -- gh.nvim keys
+      { '<leader>gh', group = '[G]it[H]ub' },
+      { '<leader>ghc', group = '+[C]ommits' },
+      { '<leader>ghi', group = '+[I]ssues' },
+      { '<leader>ghl', group = '+[L]itee' },
+      { '<leader>ghr', group = '+[R]eview' },
+      { '<leader>ghp', group = '+[P]ull Request' },
+      { '<leader>ght', group = '+[T]hreads' },
     }
   end,
 }
