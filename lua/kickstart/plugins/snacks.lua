@@ -25,6 +25,7 @@ end
 ---@field lazygit? snacks.lazygit.Config
 ---@field notifier? snacks.notifier.Config
 ---@field notify? snacks.notify.Config
+---@field picker? snacks.picker.Config
 ---@field profiler? snacks.profiler.Config
 ---@field quickfile? snacks.quickfile.Config
 ---@field rename? snacks.rename.Config
@@ -57,6 +58,7 @@ return {
     lazygit = snack_or_disabled 'lazygit',
     notifier = snack_or_disabled 'notifier',
     notify = snack_or_disabled 'notify',
+    picker = snack_or_disabled 'picker',
     profiler = snack_or_disabled 'profiler',
     quickfile = snack_or_disabled 'quickfile',
     rename = snack_or_disabled 'rename',
@@ -200,6 +202,237 @@ return {
           },
         }
       end,
+    },
+
+    -- Picker keys
+
+    {
+      '<leader>sh',
+      desc = '[S]earch [H]elp',
+      function()
+        Snacks.picker.help()
+      end,
+    },
+    {
+      '<leader>sk',
+      desc = '[S]earch [K]eymaps',
+      function()
+        Snacks.picker.keymaps()
+      end,
+    },
+    {
+      '<leader>sf',
+      desc = '[S]earch [F]iles',
+      function()
+        Snacks.picker.files()
+      end,
+    },
+    {
+      '<leader>ss',
+      desc = 'LSP [S]earch [S]ymbols',
+      function()
+        Snacks.picker.lsp_symbols()
+      end,
+    },
+    {
+      '<leader>sw',
+      desc = '[S]earch current [W]ord',
+      function()
+        Snacks.picker.grep_word()
+      end,
+    },
+    {
+      '<leader>sg',
+      desc = '[S]earch by [G]rep',
+      function()
+        Snacks.picker.grep()
+      end,
+    },
+    {
+      '<leader>sd',
+      desc = '[S]earch [D]iagnostics',
+      function()
+        Snacks.picker.diagnostics()
+      end,
+    },
+    {
+      '<leader>sR',
+      desc = '[S]earch [R]esume',
+      function()
+        Snacks.picker.resume()
+      end,
+    },
+    {
+      '<leader>s.',
+      desc = '[S]earch Recent Files ("." for repeat)',
+      function()
+        Snacks.picker.recent()
+      end,
+    },
+    {
+      '<leader><leader>',
+      desc = '[] Find existing buffers',
+      function()
+        Snacks.picker.buffers()
+      end,
+    },
+    {
+      '<leader>/',
+      desc = '[/] Fuzzily search in current buffer',
+      function()
+        Snacks.picker.lines()
+      end,
+    },
+    {
+      '<leader>s/',
+      desc = '[S]earch [/] in Open Files',
+      function()
+        Snacks.picker.grep_buffers()
+      end,
+    },
+    {
+      '<leader>sn',
+      desc = '[S]earch [N]eovim Config files',
+      function()
+        Snacks.picker.files { cwd = vim.fn.stdpath 'config' }
+      end,
+    },
+
+    {
+      '<leader>:',
+      function()
+        Snacks.picker.command_history()
+      end,
+      desc = 'Command History',
+    },
+    -- find
+    {
+      '<leader>fg',
+      function()
+        Snacks.picker.git_files()
+      end,
+      desc = 'Find Git Files',
+    },
+    {
+      '<leader>fr',
+      function()
+        Snacks.picker.recent()
+      end,
+      desc = 'Recent',
+    },
+    -- git
+    {
+      '<leader>fgd',
+      function()
+        Snacks.picker.git_diff()
+      end,
+      desc = 'Git Diff',
+    },
+    {
+      '<leader>fgf',
+      function()
+        Snacks.picker.git_files()
+      end,
+      desc = 'Git Files',
+    },
+    {
+      '<leader>fgl',
+      function()
+        Snacks.picker.git_log()
+      end,
+      desc = 'Git Diff',
+    },
+    {
+      '<leader>fgF',
+      function()
+        Snacks.picker.git_log_file()
+      end,
+      desc = 'Git Log File',
+    },
+    {
+      '<leader>fgL',
+      function()
+        Snacks.picker.git_log_line()
+      end,
+      desc = 'Git Log Line',
+    },
+    {
+      '<leader>fgs',
+      function()
+        Snacks.picker.git_status()
+      end,
+      desc = 'Git Status',
+    },
+    --search
+    {
+      '<leader>s"',
+      function()
+        Snacks.picker.registers()
+      end,
+      desc = 'Registers',
+    },
+    {
+      '<leader>sa',
+      function()
+        Snacks.picker.autocmds()
+      end,
+      desc = 'Autocmds',
+    },
+    {
+      '<leader>sc',
+      function()
+        Snacks.picker.command_history()
+      end,
+      desc = 'Command History',
+    },
+    {
+      '<leader>sC',
+      function()
+        Snacks.picker.commands()
+      end,
+      desc = 'Commands',
+    },
+    {
+      '<leader>sH',
+      function()
+        Snacks.picker.highlights()
+      end,
+      desc = 'Highlights',
+    },
+    {
+      '<leader>sj',
+      function()
+        Snacks.picker.jumps()
+      end,
+      desc = 'Jumps',
+    },
+    {
+      '<leader>sl',
+      function()
+        Snacks.picker.loclist()
+      end,
+      desc = 'Location List',
+    },
+    {
+      '<leader>sM',
+      function()
+        Snacks.picker.man()
+      end,
+      desc = 'Man Pages',
+    },
+    {
+      '<leader>sm',
+      function()
+        Snacks.picker.marks()
+      end,
+      desc = 'Marks',
+    },
+    {
+      '<leader>sq',
+      function()
+        Snacks.picker.qflist()
+      end,
+      desc = 'Quickfix List',
     },
   },
   init = function(_, opts)
