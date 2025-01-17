@@ -1,13 +1,29 @@
 return {
-  'DreamMaoMao/yazi.nvim',
-  lazy = false,
+  'mikavilpas/yazi.nvim',
   dependencies = {
-    'nvim-telescope/telescope.nvim',
     'nvim-lua/plenary.nvim',
   },
-
+  enabled = function()
+    if vim.fn.executable 'yazi' == 1 then
+      return true
+    end
+    return false
+  end,
+  lazy = true,
   keys = {
-    { '<leader>uy', '<cmd>Yazi<CR>', desc = '[U]I: Toggle [Y]azi' },
-    { '<leader>E', '<cmd>Yazi<CR>', desc = 'UI: Toggle Yazi [E]xplorer' },
+    {
+      '<leader>uy',
+      function()
+        require('yazi').toggle()
+      end,
+      desc = '[U]I: Toggle [Y]azi',
+    },
+    {
+      '<leader>E',
+      function()
+        require('yazi').toggle()
+      end,
+      desc = 'UI: Toggle Yazi [E]xplorer',
+    },
   },
 }
