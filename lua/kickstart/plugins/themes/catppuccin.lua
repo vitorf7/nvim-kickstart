@@ -84,6 +84,7 @@ local M = {
       -- end,
       integrations = {
         cmp = true,
+        blink_cmp = true,
         fidget = true,
         gitsigns = true,
         harpoon = true,
