@@ -13,7 +13,7 @@ return {
     {
       '<leader>lR',
       function()
-        require('telescope').extensions.refactoring.refactors()
+        require('refactoring').select_refactor {}
       end,
       desc = 'Refactoring',
       mode = { 'n', 'x' },
