@@ -49,8 +49,6 @@ return {
       local appearance = opts.appearance or {}
       local optsIcons = vim.tbl_extend('force', appearance.kind_icons or {}, icons)
 
-      local luasnip = require 'luasnip'
-
       ---@module 'blink.cmp'
       ---@type blink.cmp.Config
       local myopts = {
