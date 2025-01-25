@@ -68,41 +68,54 @@ return {
       layout.layout.title = ' ' .. title .. ' '
       layout.layout.title_pos = 'center'
 
-      Snacks.picker.pick {
-        source = 'select',
-        items = results,
-        main = { current = true },
-        format = function(item)
-          ---@type string
+      vim.ui.select(results, {
+        format_item = function(item)
           local path = string.gsub(item.path, bare_path .. '/', '')
-
-          local ret = {} ---@type snacks.picker.Highlight[]
-          ret[#ret + 1] = { ' ' }
-          ret[#ret + 1] = { item.branch, 'SnacksPickerRegister' }
-          ret[#ret + 1] = { ' ' }
-          ret[#ret + 1] = { '(', 'SnacksPickerDelim' }
-          ret[#ret + 1] = { item.sha, 'SnacksPickerRegister' }
-          ret[#ret + 1] = { ')', 'SnacksPickerDelim' }
-          ret[#ret + 1] = { ' ' }
-          ret[#ret + 1] = { path, 'SnacksPickerRegister' }
-          return ret
+          return path
         end,
-        actions = {
-          confirm = function(picker, item)
-            picker:close()
-            vim.notify('Current path: ' .. current_path)
-            vim.notify('Selected: ' .. vim.inspect(item))
-            vim.notify('Idx: ' .. item.idx)
+      }, function(item, idx)
+        vim.schedule(function()
+          vim.notify('Switching to: ' .. item.path)
+          -- require('git-worktree').switch_worktree(item.path)
+          -- on_choice(item and item.item, item and item.idx)
+        end)
+      end)
 
-            vim.schedule(function()
-              vim.notify('Switching to: ' .. item.path)
-              require('git-worktree').switch_worktree(item.path)
-              -- on_choice(item and item.item, item and item.idx)
-            end)
-          end,
-        },
-        layout = layout,
-      }
+      -- Snacks.picker.pick {
+      --   source = 'select',
+      --   items = results,
+      --   main = { current = true },
+      --   format = function(item)
+      --     ---@type string
+      --     local path = string.gsub(item.path, bare_path .. '/', '')
+      --
+      --     local ret = {} ---@type snacks.picker.Highlight[]
+      --     ret[#ret + 1] = { ' ' }
+      --     ret[#ret + 1] = { item.branch, 'SnacksPickerRegister' }
+      --     ret[#ret + 1] = { ' ' }
+      --     ret[#ret + 1] = { '(', 'SnacksPickerDelim' }
+      --     ret[#ret + 1] = { item.sha, 'SnacksPickerRegister' }
+      --     ret[#ret + 1] = { ')', 'SnacksPickerDelim' }
+      --     ret[#ret + 1] = { ' ' }
+      --     ret[#ret + 1] = { path, 'SnacksPickerRegister' }
+      --     return ret
+      --   end,
+      --   actions = {
+      --     confirm = function(picker, item)
+      --       picker:close()
+      --       vim.notify('Current path: ' .. current_path)
+      --       vim.notify('Selected: ' .. vim.inspect(item))
+      --       vim.notify('Idx: ' .. item.idx)
+      --
+      --       vim.schedule(function()
+      --         vim.notify('Switching to: ' .. item.path)
+      --         require('git-worktree').switch_worktree(item.path)
+      --         -- on_choice(item and item.item, item and item.idx)
+      --       end)
+      --     end,
+      --   },
+      --   layout = layout,
+      -- }
 
       -- Snacks.picker.select(results, {
       --   prompt = 'Worktrees',
