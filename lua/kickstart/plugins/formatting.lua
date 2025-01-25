@@ -14,7 +14,7 @@ return { -- Autoformat
     end,
     formatters_by_ft = {
       lua = { 'stylua' },
-      go = { 'goimports', 'gci', 'gofumpt', 'golines' },
+      go = { 'goimports', 'gofumpt', 'gci', 'golines' },
       toml = { 'taplo' },
       sql = { 'sql_formatter' },
       mysql = { 'sql_formatter' },
@@ -56,7 +56,24 @@ return { -- Autoformat
     formatters = {
       gci = {
         command = 'gci',
-        args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default', '-s', 'prefix(github.com/utilitywarehouse)', '$FILENAME' },
+        -- args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default', '-s', 'prefix(github.com/utilitywarehouse)', '$FILENAME' },
+        args = function(_, ctx)
+          local args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default' }
+          local goMonoPathSeach = '[uw/go-mono]'
+
+          local startIndex, _ = string.find(ctx.dirname, goMonoPathSeach)
+
+          if startIndex ~= nil then
+            table.insert(args, '-s')
+            table.insert(args, 'prefix(github.com/utilitywarehouse/go-mono)')
+          else
+            table.insert(args, '-s')
+            table.insert(args, 'prefix(github.com/utilitywarehouse)')
+          end
+
+          table.insert(args, '$FILENAME')
+          return args
+        end,
       },
       golines = {
         args = { '--base-formatter=gofumpt', '--ignore-generated', '--max-len=140' },
