@@ -26,45 +26,55 @@ return {
     header = { '%s', align = 'center' },
   },
   sections = {
-    { section = 'header' },
-    { section = 'keys', gap = 1, padding = 1 },
-    { icon = ' ', title = 'Recent Files', section = 'recent_files', indent = 2, padding = 1 },
-    { section = 'startup' },
+    { section = 'header', indent = 30 },
+    {
+      { section = 'keys', gap = 1, padding = 1 },
+      { icon = ' ', title = 'Recent Files', section = 'recent_files', indent = 2, padding = 1 },
+      { section = 'startup' },
+    },
+    {
+      pane = 2,
+      section = 'terminal',
+      cmd = '',
+      height = 5,
+      padding = 6,
+      indent = 10,
+    },
     {
       section = 'terminal',
-      cmd = 'pokemon-colorscripts -n charizard --no-title; sleep .1',
+      cmd = 'pokemon-colorscripts -r 1 --no-title; sleep .1',
       random = 10,
       pane = 2,
       indent = 4,
       height = 20,
     },
-    function()
-      local in_git = Snacks.git.get_root() ~= nil
-      local cmds = {
-        {
-          icon = ' ',
-          title = 'Git Status',
-          cmd = 'git --no-pager diff --stat -B -M -C',
-          height = 10,
-        },
-        -- {
-        --   title = 'Notifications',
-        --   cmd = 'gh notify -s -a -n3',
-        --   icon = ' ',
-        --   height = 3,
-        --   enabled = true,
-        -- },
-      }
-      return vim.tbl_map(function(cmd)
-        return vim.tbl_extend('force', {
-          pane = 2,
-          section = 'terminal',
-          enabled = in_git,
-          padding = 1,
-          ttl = 5 * 60,
-          indent = 3,
-        }, cmd)
-      end, cmds)
-    end,
+    -- function()
+    --   local in_git = Snacks.git.get_root() ~= nil
+    --   local cmds = {
+    --     {
+    --       icon = ' ',
+    --       title = 'Git Status',
+    --       cmd = 'git --no-pager diff --stat -B -M -C',
+    --       height = 10,
+    --     },
+    --     -- {
+    --     --   title = 'Notifications',
+    --     --   cmd = 'gh notify -s -a -n3',
+    --     --   icon = ' ',
+    --     --   height = 3,
+    --     --   enabled = true,
+    --     -- },
+    --   }
+    --   return vim.tbl_map(function(cmd)
+    --     return vim.tbl_extend('force', {
+    --       pane = 2,
+    --       section = 'terminal',
+    --       enabled = in_git,
+    --       padding = 1,
+    --       ttl = 5 * 60,
+    --       indent = 3,
+    --     }, cmd)
+    --   end, cmds)
+    -- end,
   },
 }

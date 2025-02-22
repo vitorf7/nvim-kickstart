@@ -59,9 +59,12 @@ return { -- Autoformat
         -- args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default', '-s', 'prefix(github.com/utilitywarehouse)', '$FILENAME' },
         args = function(_, ctx)
           local args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default' }
-          local goMonoPathSeach = '[uw/go-mono]'
+          local goMonoPathSeach = '(go)-(mono)'
 
           local startIndex, _ = string.find(ctx.dirname, goMonoPathSeach)
+
+          Snacks.debug('startIndex', startIndex)
+          Snacks.debug('ctx.dirname', ctx.dirname)
 
           if startIndex ~= nil then
             table.insert(args, '-s')
@@ -72,6 +75,8 @@ return { -- Autoformat
           end
 
           table.insert(args, '$FILENAME')
+
+          Snacks.debug('gci args', args)
           return args
         end,
       },

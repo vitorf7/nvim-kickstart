@@ -18,6 +18,7 @@ end
 ---@field dashboard? snacks.dashboard.Config
 ---@field debug? snacks.debug.Config
 ---@field dim? snacks.dim.Config
+---@field explorer? snacks.explorer.Config
 ---@field git? snacks.git.Config
 ---@field gitbrowse? snacks.gitbrowse.Config
 ---@field input? snacks.input.Config
@@ -51,6 +52,7 @@ return {
     dashboard = snack_or_disabled 'dashboard',
     debug = snack_or_disabled 'debug',
     dim = snack_or_disabled 'dim',
+    explorer = snack_or_disabled 'explorer',
     git = snack_or_disabled 'git',
     gitbrowse = snack_or_disabled 'gitbrowse',
     input = snack_or_disabled 'input',
@@ -72,12 +74,19 @@ return {
     words = snack_or_disabled 'words',
     zen = snack_or_disabled 'zen',
     styles = {
-      notification = {
-        -- wo = { wrap = true } -- Wrap notifications
-      },
+      -- notification = {
+      --   -- wo = { wrap = true } -- Wrap notifications
+      -- },
     },
   },
   keys = {
+    {
+      '<leader>e',
+      function()
+        Snacks.explorer()
+      end,
+      desc = 'Toggle Scratch Buffer',
+    },
     {
       '<leader>.',
       function()
@@ -245,7 +254,10 @@ return {
       '<leader>sg',
       desc = '[S]earch by [G]rep',
       function()
-        Snacks.picker.grep()
+        Snacks.picker.grep {
+          hide = true,
+          ignored = true,
+        }
       end,
     },
     {
