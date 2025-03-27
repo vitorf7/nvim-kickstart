@@ -134,6 +134,7 @@ M.servers = {
   'taplo',
   'ansiblels',
   'jinja_lsp',
+  'harper_ls',
 }
 
 ---@type string[]
