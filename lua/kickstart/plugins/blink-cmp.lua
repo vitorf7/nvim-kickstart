@@ -102,7 +102,7 @@ return {
         sources = {
           -- adding any nvim-cmp sources here will enable them
           -- with blink.compat
-          default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
+          default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'emoji', 'markdown' },
           providers = {
             lazydev = {
               name = 'LazyDev',
@@ -116,6 +116,11 @@ return {
               score_offset = 15, -- Tune by preference
               opts = { insert = true }, -- Insert emoji (default) or complete its name
             },
+            markdown = {
+              name = 'RenderMarkdown',
+              module = 'render-markdown.integ.blink',
+              fallbacks = { 'lsp' },
+            },
           },
         },
         -- 'default' for mappings similar to built-in completion
@@ -124,6 +129,10 @@ return {
         -- See the full "keymap" documentation for information on defining your own keymap.
         keymap = {
           preset = 'default',
+          -- disable tab and shift-tab
+          ['<Tab>'] = {},
+          ['<S-Tab>'] = {},
+
           ['<C-y>'] = { 'select_and_accept' },
 
           -- Select the [n]ext item
