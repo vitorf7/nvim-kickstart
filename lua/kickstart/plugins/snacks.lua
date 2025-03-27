@@ -81,13 +81,6 @@ return {
   },
   keys = {
     {
-      '<leader>e',
-      function()
-        Snacks.explorer()
-      end,
-      desc = 'Toggle Scratch Buffer',
-    },
-    {
       '<leader>.',
       function()
         Snacks.scratch()
@@ -257,6 +250,7 @@ return {
         Snacks.picker.grep {
           hide = true,
           ignored = true,
+          cwd = Snacks.git.get_root(vim.api.nvim_buf_get_name(0)) or Snacks.git.get_root(vim.fn.expand '%:p') or vim.uv.cwd(),
         }
       end,
     },
