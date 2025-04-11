@@ -13,7 +13,7 @@ vim.cmd [[command! -nargs=0 GoToCommand :lua Snacks.picker.commands()]]
 vim.cmd [[command! -nargs=0 GoToFile :lua Snacks.picker.pick("smart")]]
 -- vim.cmd [[command! -nargs=0 Grep :Telescope live_grep]]
 vim.cmd [[command! -nargs=0 Grep :lua Snacks.picker.grep()]]
-vim.cmd [[command! -nargs=0 BrowseFiles :Yazi]]
+vim.cmd [[command! -nargs=0 BrowseFiles :lua require('kickstart.config.modules.mini-files-explorer').open()]]
 vim.cmd [[command! -nargs=0 GenNvim :Gen]]
 
 -- [[ Configure and install plugins ]]

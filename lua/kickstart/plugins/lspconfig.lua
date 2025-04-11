@@ -5,6 +5,9 @@ return { -- LSP Configuration & Plugins
     'williamboman/mason.nvim',
     'williamboman/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
+    -- {
+    --   'nvim-java/nvim-java',
+    -- },
   },
   config = function(_, opts)
     -- Brief Aside: **What is LSP?**
@@ -129,15 +132,26 @@ return { -- LSP Configuration & Plugins
         --    See `:help CursorHold` for information about when this is executed
         --
         -- When you move your cursor, the highlights will be cleared (the second autocommand).
-        if client and client.server_capabilities.documentHighlightProvider then
+        if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
           vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
             buffer = event.buf,
+            group = highlight_augroup,
             callback = vim.lsp.buf.document_highlight,
           })
 
           vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
             buffer = event.buf,
+            group = highlight_augroup,
             callback = vim.lsp.buf.clear_references,
+          })
+
+          vim.api.nvim_create_autocmd('LspDetach', {
+            group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+            callback = function(event2)
+              vim.lsp.buf.clear_references()
+              vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+            end,
           })
         end
 
@@ -197,6 +211,8 @@ return { -- LSP Configuration & Plugins
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
     require('mason-lspconfig').setup {
+      automatic_installation = true,
+      ensure_installed = vim.tbl_keys(servers),
       handlers = {
         function(server_name)
           if server_name == 'bufls' then
@@ -216,6 +232,30 @@ return { -- LSP Configuration & Plugins
 
           if server_name == 'ts_ls' then
             -- disable server
+          elseif server_name == 'jdtls' then
+            return true
+            -- disable server
+            -- elseif server_name == 'jdtls' then
+            --   -- Start nvim-java before lspconfig
+            --   require('java').setup {
+            --     root_markers = {
+            --       'settings.gradle',
+            --       'settings.gradle.kts',
+            --       'pom.xml',
+            --       'build.gradle',
+            --       'mvnw',
+            --       'gradlew',
+            --       'build.gradle',
+            --       'build.gradle.kts',
+            --     },
+            --     java_debug_adapter = {
+            --       enable = false,
+            --     },
+            --     jdk = {
+            --       auto_install = false,
+            --     },
+            --   }
+            --   require('lspconfig').jdtls.setup(require 'kickstart.plugins.lsp.settings.jdtls')
           else
             require('lspconfig')[server_name].setup(server)
           end

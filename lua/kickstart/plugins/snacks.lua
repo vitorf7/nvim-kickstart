@@ -261,6 +261,14 @@ return {
         Snacks.picker.diagnostics()
       end,
     },
+
+    {
+      '<leader>sD',
+      function()
+        Snacks.picker.diagnostics_buffer()
+      end,
+      desc = '[S]earch Buffer [D]iagnostics',
+    },
     {
       '<leader>sR',
       desc = '[S]earch [R]esume',
@@ -279,7 +287,7 @@ return {
       '<leader><leader>',
       desc = '[] Find existing buffers',
       function()
-        Snacks.picker.buffers()
+        Snacks.picker.buffers { hidden = true, nofile = true }
       end,
     },
     {
@@ -293,9 +301,10 @@ return {
       '<leader>s/',
       desc = '[S]earch [/] in Open Files',
       function()
-        Snacks.picker.grep_buffers()
+        Snacks.picker.grep_buffers { hidden = true, nofile = true }
       end,
     },
+
     {
       '<leader>sn',
       desc = '[S]earch [N]eovim Config files',
@@ -310,6 +319,13 @@ return {
         Snacks.picker.command_history()
       end,
       desc = 'Command History',
+    },
+    {
+      '<leader>sp',
+      function()
+        Snacks.picker.lazy()
+      end,
+      desc = 'Search for Plugin Spec',
     },
     -- find
     {
@@ -369,6 +385,13 @@ return {
       end,
       desc = 'Git Status',
     },
+    {
+      '<leader>fgS',
+      function()
+        Snacks.picker.git_stash()
+      end,
+      desc = 'Git Stash',
+    },
     --search
     {
       '<leader>s"',
@@ -376,6 +399,13 @@ return {
         Snacks.picker.registers()
       end,
       desc = 'Registers',
+    },
+    {
+      '<leader>s;',
+      function()
+        Snacks.picker.search_history()
+      end,
+      desc = 'Search History',
     },
     {
       '<leader>sa',
@@ -446,6 +476,38 @@ return {
         Snacks.picker.qflist()
       end,
       desc = 'Quickfix List',
+    },
+    {
+      '<leader>su',
+      function()
+        Snacks.picker.undo()
+      end,
+      desc = 'Undotree',
+    },
+
+    -- ui
+    {
+      '<leader>uC',
+      function()
+        Snacks.picker.colorschemes()
+      end,
+      desc = 'Colorschemes',
+    },
+
+    -- k9s
+    {
+      '<leader>Kc',
+      function()
+        Snacks.terminal 'k9s-uw-cc-dev-aws'
+      end,
+      desc = 'k9s Contact Channels (dev-aws)',
+    },
+    {
+      '<leader>KC',
+      function()
+        Snacks.terminal 'k9s-uw-cc-prod-aws'
+      end,
+      desc = 'k9s Contact Channels (prod-aws)',
     },
   },
   init = function(_, opts)

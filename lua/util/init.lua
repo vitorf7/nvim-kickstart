@@ -135,6 +135,7 @@ M.servers = {
   'ansiblels',
   'jinja_lsp',
   'harper_ls',
+  'jdtls',
 }
 
 ---@type string[]
@@ -189,6 +190,7 @@ M.parsers = {
   'gosum',
   'gowork',
   'toml',
+  'java',
 }
 
 ---@type string[]
@@ -197,6 +199,7 @@ M.mason_tools = {
   'delve',
   'js-debug-adapter',
   'php-debug-adapter',
+  'java-debug-adapter',
 
   -- Linter
   'buf', -- also a formatter
@@ -228,6 +231,7 @@ M.mason_tools = {
   'iferr',
   'impl',
   'gotestsum',
+  'java-test',
 }
 
 ---@param plugin string

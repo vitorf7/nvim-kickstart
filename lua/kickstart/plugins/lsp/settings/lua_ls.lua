@@ -1,4 +1,3 @@
-local ih = require 'inlay-hints'
 return {
   settings = {
     Lua = {

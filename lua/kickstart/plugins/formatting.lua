@@ -14,7 +14,37 @@ return { -- Autoformat
     end,
     formatters_by_ft = {
       lua = { 'stylua' },
-      go = { 'goimports', 'gofumpt', 'gci', 'golines' },
+      go = function(bufnr)
+        local configArgs = { 'goimports', 'gofumpt' }
+        local ctx = require('conform.runner').build_context(bufnr, configArgs)
+
+        local telecomFixedLine = '(telecom%-fixed%-line)'
+
+        local startIndexTelecom, _ = string.find(ctx.dirname, telecomFixedLine)
+
+        if startIndexTelecom == nil then
+          table.insert(configArgs, 'gci')
+        end
+
+        local goMonoPathSeach1 = '(go%-mono)/(teams)/(contact%-channels)'
+        local goMonoPathSeach2 = '(go%-mono)/(teams)/(help%-and%-support)'
+
+        local startIndex1, _ = string.find(ctx.dirname, goMonoPathSeach1)
+        local startIndex2, _ = string.find(ctx.dirname, goMonoPathSeach2)
+
+        -- Snacks.debug('startIndex1 startIndex2', startIndex1, startIndex2)
+        local startIndex = startIndex1 or startIndex2
+        -- Snacks.debug('startIndex', startIndex)
+        -- Snacks.debug('ctx.dirname', ctx.dirname)
+
+        if startIndex ~= nil then
+          table.insert(configArgs, 'golines')
+        end
+
+        Snacks.debug('config', configArgs)
+        return configArgs
+      end,
+      -- go = { 'goimports', 'gofumpt', 'gci' },
       toml = { 'taplo' },
       sql = { 'sql_formatter' },
       mysql = { 'sql_formatter' },
@@ -63,8 +93,8 @@ return { -- Autoformat
 
           local startIndex, _ = string.find(ctx.dirname, goMonoPathSeach)
 
-          Snacks.debug('startIndex', startIndex)
-          Snacks.debug('ctx.dirname', ctx.dirname)
+          -- Snacks.debug('startIndex', startIndex)
+          -- Snacks.debug('ctx.dirname', ctx.dirname)
 
           if startIndex ~= nil then
             table.insert(args, '-s')
@@ -76,7 +106,7 @@ return { -- Autoformat
 
           table.insert(args, '$FILENAME')
 
-          Snacks.debug('gci args', args)
+          -- Snacks.debug('gci args', args)
           return args
         end,
       },

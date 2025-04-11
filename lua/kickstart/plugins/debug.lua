@@ -137,6 +137,16 @@ return {
         }
       end
     end
+
+    dap.configurations.java = {
+      {
+        type = 'java',
+        request = 'attach',
+        name = 'Debug (Attach) - Remote',
+        hostName = '127.0.0.1',
+        port = 5005,
+      },
+    }
   end,
   keys = {
     { '<F5>', '<cmd>lua require("dap").continue()<cr>', desc = 'Start/Continue' },

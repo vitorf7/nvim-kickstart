@@ -1,4 +1,3 @@
-local ih = require 'inlay-hints'
 return {
   on_attach = require('util').lsp.on_attach(function(client, bufnr)
     if vim.fn.has 'nvim-0.10' == 0 then
@@ -6,8 +5,6 @@ return {
         client.server_capabilities.documentFormattingProvider = true
       end
     end
-
-    ih.on_attach(client, bufnr)
   end),
   -- Have to add this for yamlls to understand that we support line folding
   capabilities = {
