@@ -21,6 +21,7 @@ end
 ---@field explorer? snacks.explorer.Config
 ---@field git? snacks.git.Config
 ---@field gitbrowse? snacks.gitbrowse.Config
+---@field image? snacks.image.Config
 ---@field input? snacks.input.Config
 ---@field indent? snacks.indent.Config
 ---@field lazygit? snacks.lazygit.Config
@@ -55,6 +56,7 @@ return {
     explorer = snack_or_disabled 'explorer',
     git = snack_or_disabled 'git',
     gitbrowse = snack_or_disabled 'gitbrowse',
+    image = snack_or_disabled 'image',
     input = snack_or_disabled 'input',
     indent = snack_or_disabled 'indent',
     lazygit = snack_or_disabled 'lazygit',
