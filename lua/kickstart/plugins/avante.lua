@@ -113,11 +113,13 @@ return {
   opts = {
     debug = true,
     provider = 'ollama',
-    ollama = {
-      endpoint = 'http://127.0.0.1:11434', -- Note that there is no /v1 at the end.
-      model = 'qwen2.5-coder:7b', -- Specify your model here
-      -- model = 'deepseek-r1:14b',
-      stream = true,
+    providers = {
+      ollama = {
+        endpoint = 'http://127.0.0.1:11434', -- Note that there is no /v1 at the end.
+        model = 'qwen2.5-coder:7b', -- Specify your model here
+        -- model = 'deepseek-r1:14b',
+        stream = true,
+      },
     },
     windows = {
       postion = 'right',
