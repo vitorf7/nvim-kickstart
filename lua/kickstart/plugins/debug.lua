@@ -13,6 +13,18 @@ return {
   dependencies = {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
+    {
+      'igorlfs/nvim-dap-view',
+      ---@module 'dap-view'
+      ---@type dapview.Config
+      opts = {
+        winbar = {
+          controls = {
+            enabled = true,
+          },
+        },
+      },
+    },
 
     -- Installs the debug adapters for you
     'williamboman/mason.nvim',
@@ -52,25 +64,25 @@ return {
 
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
-    dapui.setup {
-      -- Set icons to characters that are more likely to work in every terminal.
-      --    Feel free to remove or use ones that you like more! :)
-      --    Don't feel like these are good choices.
-      icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
-      controls = {
-        icons = {
-          pause = '⏸',
-          play = '▶',
-          step_into = '⏎',
-          step_over = '⏭',
-          step_out = '⏮',
-          step_back = 'b',
-          run_last = '▶▶',
-          terminate = '⏹',
-          disconnect = '⏏',
-        },
-      },
-    }
+    -- dapui.setup {
+    --   -- Set icons to characters that are more likely to work in every terminal.
+    --   --    Feel free to remove or use ones that you like more! :)
+    --   --    Don't feel like these are good choices.
+    --   icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
+    --   controls = {
+    --     icons = {
+    --       pause = '⏸',
+    --       play = '▶',
+    --       step_into = '⏎',
+    --       step_over = '⏭',
+    --       step_out = '⏮',
+    --       step_back = 'b',
+    --       run_last = '▶▶',
+    --       terminate = '⏹',
+    --       disconnect = '⏏',
+    --     },
+    --   },
+    -- }
 
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     -- vim.keymap.set('n', '<F7>', dapui.toggle, { desc = 'Debug: See last session result.' })
@@ -161,7 +173,8 @@ return {
     { '<leader>db', '<cmd>lua require("dap").toggle_breakpoint()<cr>', desc = 'Toggle Breakpoint' },
     { '<leader>dB', '<cmd>lua require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))<cr>', desc = 'Set Breakpoint' },
     { '<leader>dB', '<cmd>lua require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))<cr>', desc = 'Set Breakpoint' },
-    { '<leader>du', '<cmd>lua require("dapui").toggle()<cr>', desc = 'Toggle debug UI (see last session)' },
+    -- { '<leader>du', '<cmd>lua require("dapui").toggle()<cr>', desc = 'Toggle debug UI (see last session)' },
+    { '<leader>du', '<cmd>lua require("dap-view").toggle()<cr>', desc = 'Toggle debug UI (see last session)' },
     {
       '<leader>td',
       function()

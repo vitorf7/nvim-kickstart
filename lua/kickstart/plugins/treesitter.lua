@@ -1,9 +1,9 @@
 local Util = require 'util'
 return { -- Highlight, edit, and navigate code
   'nvim-treesitter/nvim-treesitter',
+  lazy = false,
   build = ':TSUpdate',
-  cmd = { 'TSUpdateSync', 'TSUpdate', 'TSInstall' },
-  event = { 'VeryLazy' },
+  main = 'nvim-treesitter.configs', -- Sets main module to use for opts
   init = function(plugin)
     -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
     -- This is needed because a bunch of plugins no longer `require("nvim-treesitter")`, which
@@ -14,6 +14,13 @@ return { -- Highlight, edit, and navigate code
     require 'nvim-treesitter.query_predicates'
   end,
   dependencies = {
+    {
+      'nvim-treesitter/nvim-treesitter-context',
+      event = 'BufReadPost',
+      opts = function()
+        return { mode = 'cursor', max_lines = 3 }
+      end,
+    },
     {
       'nvim-treesitter/nvim-treesitter-textobjects',
       config = function()
