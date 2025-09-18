@@ -1,6 +1,7 @@
 return {
   'ldelossa/gh.nvim',
   event = 'VeryLazy',
+  enabled = false,
   dependencies = {
     {
       'ldelossa/litee.nvim',
