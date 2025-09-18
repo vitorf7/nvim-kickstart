@@ -1,5 +1,6 @@
 return { -- LSP Configuration & Plugins
   'neovim/nvim-lspconfig',
+  event = { 'VimEnter' },
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for neovim
     'williamboman/mason.nvim',
@@ -10,15 +11,15 @@ return { -- LSP Configuration & Plugins
     -- },
   },
   config = function(_, opts)
-    -- Brief Aside: **What is LSP?**
+    -- Brief aside: **What is LSP?**
     --
-    -- LSP is an acronym you've probably heard, but might not understand what it is.
+    -- LSP is an initialism you've probably heard, but might not understand what it is.
     --
     -- LSP stands for Language Server Protocol. It's a protocol that helps editors
     -- and language tooling communicate in a standardized fashion.
     --
     -- In general, you have a "server" which is some tool built to understand a particular
-    -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc). These Language Servers
+    -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc.). These Language Servers
     -- (sometimes called LSP servers, but that's kind of like ATM Machine) are standalone
     -- processes that communicate with some "client" - in this case, Neovim!
     --
@@ -42,22 +43,34 @@ return { -- LSP Configuration & Plugins
     vim.api.nvim_create_autocmd('LspAttach', {
       group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
       callback = function(event)
-        -- NOTE: Remember that lua is a real programming language, and as such it is possible
-        -- to define small helper and utility functions so you don't have to repeat yourself
-        -- many times.
+        -- NOTE: Remember that Lua is a real programming language, and as such it is possible
+        -- to define small helper and utility functions so you don't have to repeat yourself.
         --
         -- In this case, we create a function that lets us more easily define mappings specific
         -- for LSP related items. It sets the mode, buffer and description for us each time.
-        local map = function(keys, func, desc)
-          vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+        local map = function(keys, func, desc, mode)
+          mode = mode or 'n'
+          vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
         end
 
         local client = vim.lsp.get_client_by_id(event.data.client_id)
 
+        -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
+        ---@param client vim.lsp.Client
+        ---@param method vim.lsp.protocol.Method
+        ---@param bufnr? integer some lsp support methods only in specific files
+        ---@return boolean
+        local function client_supports_method(client, method, bufnr)
+          if vim.fn.has 'nvim-0.11' == 1 then
+            return client:supports_method(method, bufnr)
+          else
+            return client.supports_method(method, { bufnr = bufnr })
+          end
+        end
+
         -- Jump to the definition of the word under your cursor.
         --  This is where a variable was first declared, or where a function is defined, etc.
         --  To jump back, press <C-T>.
-        -- map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
         map('gd', function()
           Snacks.picker.lsp_definitions()
         end, '[G]oto [D]efinition')
@@ -132,7 +145,7 @@ return { -- LSP Configuration & Plugins
         --    See `:help CursorHold` for information about when this is executed
         --
         -- When you move your cursor, the highlights will be cleared (the second autocommand).
-        if client and client.supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+        if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
           local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
           vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
             buffer = event.buf,
