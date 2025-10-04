@@ -16,8 +16,8 @@ return {
         },
       },
       branch = 'main',
+      version = '1.*',
     },
-    { 'haydenmeade/neotest-jest' },
   },
   opts = {
     -- Can be a list of adapters like what neotest expects,
@@ -34,26 +34,16 @@ return {
       -- },
       ['neotest-golang'] = {
         runner = 'gotestsum',
-        go_test_args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
+        go_test_args = {
+          '-count=1',
+          '-timeout=60s',
+          -- '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out',
+        },
         dap_go_enabled = true,
         testify_enabled = true,
         colorize_test_output = true,
       },
-      ['neotest-jest'] = {
-        jestcommand = 'npm test --',
-        jestconfigfile = 'jest.config.cjs',
-        env = { ci = true },
-        cwd = function()
-          return vim.fn.getcwd()
-        end,
-      },
     },
-    -- Example for loading neotest-go with a custom config
-    -- adapters = {
-    --   ["neotest-go"] = {
-    --     args = { "-tags=integration" },
-    --   },
-    -- },
     status = { virtual_text = true },
     output = { open_on_run = true },
     quickfix = {
@@ -123,8 +113,11 @@ return {
             local meta = getmetatable(adapter)
             if adapter.setup then
               adapter.setup(config)
+            elseif adapter.adapter then
+              adapter.adapter(config)
+              adapter = adapter.adapter
             elseif meta and meta.__call then
-              adapter(config)
+              adapter = adapter(config)
             else
               error('Adapter ' .. name .. ' does not support setup')
             end

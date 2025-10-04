@@ -166,6 +166,7 @@ M.parsers = {
   'json5',
   'jsonc',
   'lua',
+  'latex',
   'make',
   'markdown',
   'markdown_inline',
