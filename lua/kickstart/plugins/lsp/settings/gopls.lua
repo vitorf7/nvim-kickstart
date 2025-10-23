@@ -63,6 +63,7 @@ return {
       'go.mod',
       '.git',
       '.golangci.yaml',
+      '.golangci.yml',
       'flake.nix',
       'flake.lock',
     }
