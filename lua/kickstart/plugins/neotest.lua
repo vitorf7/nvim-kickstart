@@ -6,18 +6,16 @@ return {
     { 'antoinemadec/FixCursorHold.nvim' },
     { 'nvim-treesitter/nvim-treesitter' },
     { 'nvim-neotest/neotest-plenary' },
-    -- { 'nvim-neotest/neotest-go' },
     {
       'fredrikaverpil/neotest-golang',
+      version = '*',
       dependencies = {
         {
           'leoluz/nvim-dap-go',
           opts = {},
         },
       },
-      branch = 'main',
     },
-    { 'haydenmeade/neotest-jest' },
   },
   opts = {
     -- Can be a list of adapters like what neotest expects,
@@ -34,19 +32,31 @@ return {
       -- },
       ['neotest-golang'] = {
         runner = 'gotestsum',
-        go_test_args = { '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
+        go_test_args = { '-v', '-race', '-count=1', '-timeout=60s', '-coverprofile=' .. vim.fn.getcwd() .. '/coverage.out' },
         dap_go_enabled = true,
         testify_enabled = true,
         colorize_test_output = true,
+        gotestsum_args = { '--format=standard-verbose' },
+        warn_test_name_dupes = false,
+
+        -- colorize_test_output = true,
+        -- dev_notifications = true,
+        -- go_test_args = { '-v', '-race', '-count=1' },
+        -- gotestsum_args = { '--format=standard-verbose' },
+        -- log_level = 3,
+        -- runner = 'go',
+        -- testify_enabled = true,
+        -- warn_test_name_dupes = true,
       },
-      ['neotest-jest'] = {
-        jestcommand = 'npm test --',
-        jestconfigfile = 'jest.config.cjs',
-        env = { ci = true },
-        cwd = function()
-          return vim.fn.getcwd()
-        end,
-      },
+
+      -- ['neotest-jest'] = {
+      --   jestcommand = 'npm test --',
+      --   jestconfigfile = 'jest.config.cjs',
+      --   env = { ci = true },
+      --   cwd = function()
+      --     return vim.fn.getcwd()
+      --   end,
+      -- },
     },
     -- Example for loading neotest-go with a custom config
     -- adapters = {

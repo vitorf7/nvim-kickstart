@@ -89,16 +89,22 @@ return { -- Autoformat
         -- args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default', '-s', 'prefix(github.com/utilitywarehouse)', '$FILENAME' },
         args = function(_, ctx)
           local args = { 'write', '--skip-generated', '--skip-vendor', '-s', 'standard', '-s', 'default' }
-          local goMonoPathSeach = '(go)-(mono)'
 
-          local startIndex, _ = string.find(ctx.dirname, goMonoPathSeach)
+          local goMonoPathSeach = '(go)-(mono)'
+          local goMonoStartIndex, _ = string.find(ctx.dirname, goMonoPathSeach)
+
+          local uwosGoPathSeach = '(uwos)-(go)'
+          local uwosGoStartIndex, _ = string.find(ctx.dirname, uwosGoPathSeach)
 
           -- Snacks.debug('startIndex', startIndex)
           -- Snacks.debug('ctx.dirname', ctx.dirname)
 
-          if startIndex ~= nil then
+          if goMonoStartIndex ~= nil then
             table.insert(args, '-s')
             table.insert(args, 'prefix(github.com/utilitywarehouse/go-mono)')
+          elseif uwosGoStartIndex ~= nil then
+            table.insert(args, '-s')
+            table.insert(args, 'prefix(github.com/utilitywarehouse/uwos-go)')
           else
             table.insert(args, '-s')
             table.insert(args, 'prefix(github.com/utilitywarehouse)')
