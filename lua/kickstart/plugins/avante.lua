@@ -8,7 +8,6 @@ return {
 
   dependencies = {
     'nvim-treesitter/nvim-treesitter',
-    'stevearc/dressing.nvim',
     'nvim-lua/plenary.nvim',
     'MunifTanjim/nui.nvim',
     'nvim-tree/nvim-web-devicons',
@@ -47,7 +46,7 @@ return {
   config = function(_, opts)
     require('avante_lib').load()
     require('avante').setup {
-      debug = true,
+      debug = false,
       -- cursor_applying_provider = nil,
       behaviour = {
         enable_cursor_planning_mode = true,
