@@ -164,7 +164,7 @@ M.parsers = {
   'javascript',
   'json',
   'json5',
-  'jsonc',
+  -- 'jsonc',
   'lua',
   'make',
   'markdown',
