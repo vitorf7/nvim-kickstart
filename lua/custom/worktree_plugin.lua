@@ -1,10 +1,40 @@
--- ~/.config/nvim/lua/kickstart/plugins/worktree.lua
+-- ~/.config/nvim/lua/custom/worktree.lua
 -- Git Worktree Manager for Neovim with Snacks Picker
+-- A comprehensive plugin for managing git worktrees with an intuitive picker interface
 
--- The actual plugin code
+---@class Worktree
+---@field path string Absolute path to the worktree
+---@field head string|nil SHA of the current HEAD commit
+---@field branch string|nil Name of the checked out branch
+---@field detached boolean|nil Whether HEAD is detached
+---@field current boolean|nil Whether this is the current worktree
+
+---@class WorktreePickerItem
+---@field file string Path for picker (usually worktree path)
+---@field text string Fallback text display
+---@field worktree Worktree The worktree data
+---@field relpath string Relative path from repo container
+
+---@class WorktreeConfig
+---@field keymaps table<string, string>|nil Key mappings for worktree actions
+
 local M = {}
 
--- Utility function to execute git commands
+-- ============================================================================
+-- Configuration
+-- ============================================================================
+
+---@type WorktreeConfig
+M.config = {}
+
+-- ============================================================================
+-- Git Command Utilities
+-- ============================================================================
+
+---Execute a git command and return the output
+---@param args string[] Git command arguments
+---@param opts? {ignore_error?: boolean} Options for error handling
+---@return string[]|nil output Command output lines, or nil on error
 local function git_cmd(args, opts)
   opts = opts or {}
   local cmd = vim.list_extend({ 'git' }, args)
@@ -21,6 +51,12 @@ local function git_cmd(args, opts)
   return result
 end
 
+-- ============================================================================
+-- Path Utilities
+-- ============================================================================
+
+---Get the root directory of the main worktree
+---@return string|nil root_dir The root directory path
 local function get_repo_root_dir()
   local out = git_cmd({ 'worktree', 'list', '--porcelain' }, { ignore_error = true })
   if not out then
@@ -30,7 +66,6 @@ local function get_repo_root_dir()
   for _, line in ipairs(out) do
     local wt = line:match '^worktree (.+)$'
     if wt then
-      -- just the main worktree directory
       return vim.fn.fnamemodify(wt, ':p:h')
     end
   end
@@ -38,6 +73,8 @@ local function get_repo_root_dir()
   return nil
 end
 
+---Get the container directory (parent of main worktree)
+---@return string|nil container_dir The container directory path
 local function get_repo_container_dir()
   local out = git_cmd({ 'worktree', 'list', '--porcelain' }, { ignore_error = true })
   if not out then
@@ -47,7 +84,6 @@ local function get_repo_container_dir()
   for _, line in ipairs(out) do
     local wt = line:match '^worktree (.+)$'
     if wt then
-      -- parent of main worktree
       return vim.fn.fnamemodify(wt, ':p:h:h')
     end
   end
@@ -55,6 +91,9 @@ local function get_repo_container_dir()
   return nil
 end
 
+---Convert worktree path to relative path from repo container
+---@param worktree_path string Absolute path to worktree
+---@return string relative_path Relative path or fallback
 local function path_from_repo_container(worktree_path)
   local base = get_repo_container_dir()
   if not base then
@@ -76,7 +115,12 @@ local function path_from_repo_container(worktree_path)
   return vim.fn.fnamemodify(worktree_path, ':~')
 end
 
--- Parse worktree list output
+-- ============================================================================
+-- Worktree Parsing
+-- ============================================================================
+
+---Parse git worktree list output into structured data
+---@return Worktree[] worktrees List of parsed worktrees
 local function parse_worktrees()
   local output = git_cmd { 'worktree', 'list', '--porcelain' }
   if not output then
@@ -85,6 +129,7 @@ local function parse_worktrees()
 
   local worktrees = {}
   local current_item = { current = false }
+  local cwd = vim.fn.fnamemodify(vim.fn.getcwd(), ':p')
 
   for _, line in ipairs(output) do
     if line:match '^worktree ' then
@@ -96,22 +141,46 @@ local function parse_worktrees()
     elseif line:match '^detached' then
       current_item.detached = true
     elseif line == '' and current_item.path then
+      -- Check if this is the current worktree
+      if vim.fn.fnamemodify(current_item.path, ':p') == cwd then
+        current_item.current = true
+      end
       table.insert(worktrees, current_item)
-      current_item = {}
-    elseif vim.fn.fnamemodify(vim.fn.getcwd(), ':p') == vim.fn.fnamemodify(current_item.path, ':p') then
-      current_item.current = true
+      current_item = { current = false }
     end
   end
 
   -- Add last entry if exists
   if current_item.path then
+    if vim.fn.fnamemodify(current_item.path, ':p') == cwd then
+      current_item.current = true
+    end
     table.insert(worktrees, current_item)
   end
 
   return worktrees
 end
 
--- Format worktree for display in picker
+---Filter out bare worktrees (those without branches)
+---@param worktrees Worktree[] List of worktrees
+---@return Worktree[] filtered Non-bare worktrees only
+local function filter_bare_worktrees(worktrees)
+  local filtered = {}
+  for _, wt in ipairs(worktrees) do
+    if wt.branch or wt.detached then
+      table.insert(filtered, wt)
+    end
+  end
+  return filtered
+end
+
+-- ============================================================================
+-- Formatting
+-- ============================================================================
+
+---Format worktree for simple text display
+---@param wt Worktree The worktree to format
+---@return string formatted Formatted string
 local function format_worktree(wt)
   local marker = wt.current and '󰄳 ' or '  '
   local branch = wt.branch or (wt.detached and 'DETACHED') or 'bare'
@@ -121,95 +190,78 @@ local function format_worktree(wt)
   return string.format('%s%-30s %-25s %-8s', marker, path, branch, sha)
 end
 
--- Switch to worktree directory
+---Format worktree for picker display with syntax highlighting
+---@param item WorktreePickerItem The picker item
+---@param ctx table Picker context
+---@return table[] highlights Array of highlight segments
+local function format_worktree_picker(item, ctx)
+  local a = require('snacks').picker.util.align
+  local ret = {} ---@type snacks.picker.Highlight[]
+
+  local wt = item.worktree
+  if not wt then
+    return { { item.text or '' } }
+  end
+
+  local win = ctx and ctx.win or 0
+  local total = vim.api.nvim_win_get_width(win > 0 and win or 0)
+
+  -- Responsive column sizing
+  local marker_w = 2
+  local sha_w = 8
+  local path_w = math.max(35, math.floor(total * 0.5))
+  local branch_w = math.max(14, total - (marker_w + path_w + sha_w + 6))
+
+  -- Current worktree indicator
+  if wt.current then
+    ret[#ret + 1] = { a('󰄳 ', marker_w), 'SnacksPickerGitBranchCurrent' }
+  else
+    ret[#ret + 1] = { a('  ', marker_w) }
+  end
+
+  -- Relative path (dimmed)
+  ret[#ret + 1] = {
+    a(item.relpath, path_w, { truncate = true }),
+    'Comment',
+  }
+
+  ret[#ret + 1] = { ' ' }
+
+  -- Branch name
+  local branch = wt.branch or (wt.detached and 'DETACHED') or 'bare'
+  ret[#ret + 1] = {
+    a(branch, branch_w, { truncate = true }),
+    'SnacksPickerGitBranch',
+  }
+
+  ret[#ret + 1] = { ' ' }
+
+  -- Commit SHA
+  local sha = wt.head and wt.head:sub(1, 8) or ''
+  ret[#ret + 1] = {
+    a(sha, sha_w),
+    'SnacksPickerGitCommit',
+  }
+
+  return ret
+end
+
+-- ============================================================================
+-- Worktree Operations
+-- ============================================================================
+
+---Switch to a worktree directory
+---@param picker table The picker instance
+---@param worktree Worktree The worktree to switch to
 local function switch_to_worktree(picker, worktree)
   vim.cmd('cd ' .. vim.fn.fnameescape(worktree.path))
   vim.notify('Switched to worktree: ' .. worktree.path, vim.log.levels.INFO)
-
-  -- Close picker
   picker:close()
 end
 
--- Create new worktree
-function M.create_worktree()
-  -- Get available branches
-  local branches = git_cmd { 'branch', '-a', '--format=%(refname:short)' }
-  if not branches then
-    return
-  end
-
-  -- Remove duplicates and clean branch names
-  local seen = {}
-  local clean_branches = {}
-  for _, branch in ipairs(branches) do
-    local clean = branch:gsub('^remotes/[^/]+/', '')
-    if not seen[clean] then
-      seen[clean] = true
-      table.insert(clean_branches, clean)
-    end
-  end
-
-  -- Ask user to select base branch
-  vim.ui.select(clean_branches, {
-    prompt = 'Select base branch: ',
-  }, function(base_branch)
-    if not base_branch then
-      return
-    end
-
-    -- Ask for new branch name
-    vim.ui.input({
-      prompt = 'New branch name (leave empty to checkout existing): ',
-      default = '',
-    }, function(new_branch)
-      if new_branch == nil then
-        return
-      end
-
-      -- Ask for worktree directory
-      local repo_base = get_repo_root_dir()
-      local default_path = repo_base and (repo_base .. '/') or './'
-      local suggested_dir = default_path
-      if new_branch ~= '' then
-        suggested_dir = vim.fn.fnamemodify(default_path, ':p') .. new_branch
-      end
-
-      vim.ui.input({
-        prompt = 'Worktree directory: ',
-        default = suggested_dir,
-        completion = 'dir',
-      }, function(wt_path)
-        if not wt_path then
-          return
-        end
-
-        -- Expand path
-        wt_path = vim.fn.expand(wt_path)
-
-        -- Build git worktree add command
-        local cmd_args = { 'worktree', 'add' }
-
-        if new_branch ~= '' then
-          table.insert(cmd_args, '-b')
-          table.insert(cmd_args, new_branch)
-        end
-
-        table.insert(cmd_args, wt_path)
-        table.insert(cmd_args, base_branch)
-
-        -- Execute command
-        local result = git_cmd(cmd_args)
-        if result then
-          vim.notify('Worktree created successfully', vim.log.levels.INFO)
-          -- Switch to new worktree
-          vim.cmd('cd ' .. vim.fn.fnameescape(wt_path))
-        end
-      end)
-    end)
-  end)
-end
-
--- Delete worktree
+---Delete a worktree with safety checks
+---@param picker table The picker instance
+---@param worktree Worktree The worktree to delete
 local function delete_worktree(picker, worktree)
   if not worktree or not worktree.path then
     vim.notify('Invalid worktree: ' .. vim.inspect(worktree), vim.log.levels.ERROR)
@@ -218,18 +270,14 @@ local function delete_worktree(picker, worktree)
 
   local display = format_worktree(worktree)
 
-  -- First check if worktree is dirty or locked
-  -- Change to the worktree directory to check its status
+  -- Check worktree status
   local current_dir = vim.fn.getcwd()
   vim.cmd('cd ' .. vim.fn.fnameescape(worktree.path))
-
   local status_result = git_cmd({ 'status', '--porcelain' }, { ignore_error = true })
   local is_dirty = status_result and #status_result > 0
-
-  -- Return to original directory
   vim.cmd('cd ' .. vim.fn.fnameescape(current_dir))
 
-  -- Check if locked (worktree list shows locked status)
+  -- Check if locked
   local worktree_info = git_cmd({ 'worktree', 'list', '--porcelain' }, { ignore_error = true })
   local is_locked = false
   if worktree_info then
@@ -246,6 +294,7 @@ local function delete_worktree(picker, worktree)
     end
   end
 
+  -- Confirm deletion
   vim.ui.select({ 'Yes', 'No' }, {
     prompt = 'Delete worktree: ' .. display .. '?',
   }, function(confirm)
@@ -253,6 +302,9 @@ local function delete_worktree(picker, worktree)
       return
     end
 
+    ---Execute worktree deletion
+    ---@param force boolean Whether to force deletion
+    ---@return boolean success Whether deletion succeeded
     local function do_delete(force)
       local cmd_args = { 'worktree', 'remove' }
       if force then
@@ -270,8 +322,8 @@ local function delete_worktree(picker, worktree)
       return true
     end
 
+    ---Finish deletion process (branch cleanup and picker refresh)
     local function finish_deletion()
-      -- Ask about deleting branch
       if worktree.branch then
         vim.ui.select({ 'Yes', 'No' }, {
           prompt = "Delete branch '" .. worktree.branch .. "' as well?",
@@ -281,14 +333,12 @@ local function delete_worktree(picker, worktree)
             vim.notify('Branch deleted: ' .. worktree.branch, vim.log.levels.INFO)
           end
 
-          -- Close and refresh picker
           picker:close()
           vim.schedule(function()
             M.manage()
           end)
         end)
       else
-        -- No branch to delete, just close and refresh
         picker:close()
         vim.schedule(function()
           M.manage()
@@ -296,7 +346,7 @@ local function delete_worktree(picker, worktree)
       end
     end
 
-    -- Check if we need to force delete
+    -- Handle dirty or locked worktrees
     if is_dirty or is_locked then
       local reason = is_locked and 'locked' or 'dirty (has uncommitted changes)'
       vim.ui.select({ 'Yes', 'No' }, {
@@ -313,7 +363,6 @@ local function delete_worktree(picker, worktree)
         end
       end)
     else
-      -- Clean worktree, delete normally
       if do_delete(false) then
         finish_deletion()
       else
@@ -323,65 +372,85 @@ local function delete_worktree(picker, worktree)
   end)
 end
 
--- Format worktree for display in picker with highlights
-local function format_worktree_picker(item, ctx)
-  local a = require('snacks').picker.util.align
-  local ret = {} ---@type snacks.picker.Highlight[]
+-- ============================================================================
+-- Public API
+-- ============================================================================
 
-  local wt = item.worktree
-  if not wt then
-    return { { item.text or '' } }
+---Create a new worktree interactively
+function M.create_worktree()
+  local branches = git_cmd { 'branch', '-a', '--format=%(refname:short)' }
+  if not branches then
+    return
   end
 
-  local win = ctx and ctx.win or 0
-  local total = vim.api.nvim_win_get_width(win > 0 and win or 0)
-
-  -- column sizing (responsive)
-  local marker_w = 2
-  local sha_w = 8
-  local path_w = math.max(35, math.floor(total * 0.5))
-  -- local branch_w = math.max(14, math.floor(total * 0.25))
-  local branch_w = math.max(14, total - (marker_w + path_w + sha_w + 6))
-
-  local cwd = vim.fn.fnamemodify(vim.fn.getcwd(), ':p')
-  local is_current = cwd == vim.fn.fnamemodify(wt.path, ':p')
-
-  -- 1. current marker
-  if is_current then
-    ret[#ret + 1] = { a('󰄳 ', marker_w), 'SnacksPickerGitBranchCurrent' }
-  else
-    ret[#ret + 1] = { a('  ', marker_w) }
+  -- Remove duplicates and clean branch names
+  local seen = {}
+  local clean_branches = {}
+  for _, branch in ipairs(branches) do
+    local clean = branch:gsub('^remotes/[^/]+/', '')
+    if not seen[clean] then
+      seen[clean] = true
+      table.insert(clean_branches, clean)
+    end
   end
 
-  -- 2. relative path (dimmed)
-  local relpath = item.relpath
-  ret[#ret + 1] = {
-    a(relpath, path_w, { truncate = true }),
-    'Comment',
-  }
+  -- Select base branch
+  vim.ui.select(clean_branches, {
+    prompt = 'Select base branch: ',
+  }, function(base_branch)
+    if not base_branch then
+      return
+    end
 
-  ret[#ret + 1] = { ' ' }
+    -- Get new branch name
+    vim.ui.input({
+      prompt = 'New branch name (leave empty to checkout existing): ',
+      default = '',
+    }, function(new_branch)
+      if new_branch == nil then
+        return
+      end
 
-  -- 3. branch
-  local branch = wt.branch or (wt.detached and 'DETACHED') or 'bare'
-  ret[#ret + 1] = {
-    a(branch, branch_w, { truncate = true }),
-    'SnacksPickerGitBranch',
-  }
+      -- Get worktree directory
+      local repo_base = get_repo_root_dir()
+      local default_path = repo_base and (repo_base .. '/') or './'
+      local suggested_dir = default_path
+      if new_branch ~= '' then
+        suggested_dir = vim.fn.fnamemodify(default_path, ':p') .. new_branch
+      end
 
-  ret[#ret + 1] = { ' ' }
+      vim.ui.input({
+        prompt = 'Worktree directory: ',
+        default = suggested_dir,
+        completion = 'dir',
+      }, function(wt_path)
+        if not wt_path then
+          return
+        end
 
-  -- 4. commit
-  local sha = wt.head and wt.head:sub(1, 8) or ''
-  ret[#ret + 1] = {
-    a(sha, sha_w),
-    'SnacksPickerGitCommit',
-  }
+        wt_path = vim.fn.expand(wt_path)
 
-  return ret
+        -- Build command
+        local cmd_args = { 'worktree', 'add' }
+        if new_branch ~= '' then
+          table.insert(cmd_args, '-b')
+          table.insert(cmd_args, new_branch)
+        end
+        table.insert(cmd_args, wt_path)
+        table.insert(cmd_args, base_branch)
+
+        -- Execute
+        local result = git_cmd(cmd_args)
+        if result then
+          vim.notify('Worktree created successfully', vim.log.levels.INFO)
+          vim.cmd('cd ' .. vim.fn.fnameescape(wt_path))
+        end
+      end)
+    end)
+  end)
 end
 
--- Main worktree picker
+---Open the worktree management picker
 function M.manage()
   local snacks_ok, snacks = pcall(require, 'snacks')
   if not snacks_ok then
@@ -389,28 +458,20 @@ function M.manage()
     return
   end
 
-  local worktrees = parse_worktrees()
+  local worktrees = filter_bare_worktrees(parse_worktrees())
   if #worktrees == 0 then
-    vim.notify('No worktrees found', vim.log.levels.WARN)
+    vim.notify('No non-bare worktrees found', vim.log.levels.WARN)
     return
   end
 
   local items = {}
   for _, wt in ipairs(worktrees) do
-    -- Skip bare worktrees (those without a branch and not detached)
-    if wt.branch or wt.detached then
-      table.insert(items, {
-        file = wt.path,
-        text = format_worktree(wt), -- Fallback text
-        worktree = wt,
-        relpath = path_from_repo_container(wt.path),
-      })
-    end
-  end
-
-  if #items == 0 then
-    vim.notify('No non-bare worktrees found', vm.log.levels.WARN)
-    return
+    table.insert(items, {
+      file = wt.path,
+      text = format_worktree(wt),
+      worktree = wt,
+      relpath = path_from_repo_container(wt.path),
+    })
   end
 
   snacks.picker.pick {
@@ -441,7 +502,7 @@ function M.manage()
   }
 end
 
--- Switch to worktree (quick switch without management options)
+---Open the quick worktree switcher
 function M.switch()
   local snacks_ok, snacks = pcall(require, 'snacks')
   if not snacks_ok then
@@ -449,28 +510,20 @@ function M.switch()
     return
   end
 
-  local worktrees = parse_worktrees()
+  local worktrees = filter_bare_worktrees(parse_worktrees())
   if #worktrees == 0 then
-    vim.notify('No worktrees found', vim.log.levels.WARN)
+    vim.notify('No non-bare worktrees found', vim.log.levels.WARN)
     return
   end
 
   local items = {}
   for _, wt in ipairs(worktrees) do
-    -- Skip bare worktrees
-    if wt.branch or wt.detached then
-      table.insert(items, {
-        file = wt.path,
-        text = format_worktree(wt),
-        worktree = wt,
-        relpath = path_from_repo_container(wt.path),
-      })
-    end
-  end
-
-  if #items == 0 then
-    vim.notify('No non-bare worktrees found', vim.log.levels.WARN)
-    return
+    table.insert(items, {
+      file = wt.path,
+      text = format_worktree(wt),
+      worktree = wt,
+      relpath = path_from_repo_container(wt.path),
+    })
   end
 
   snacks.picker.pick {
@@ -486,7 +539,7 @@ function M.switch()
   }
 end
 
--- List all worktrees (read-only view)
+---List all worktrees in a floating window
 function M.list()
   local worktrees = parse_worktrees()
   if #worktrees == 0 then
@@ -499,14 +552,14 @@ function M.list()
     table.insert(lines, format_worktree(wt))
   end
 
-  -- create scratch buffer
+  -- Create scratch buffer
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
   vim.api.nvim_buf_set_option(buf, 'modifiable', false)
   vim.api.nvim_buf_set_option(buf, 'filetype', 'gitworktrees')
 
-  -- open floating window
+  -- Open floating window
   local width = math.min(120, vim.o.columns - 4)
   local height = math.min(#lines + 2, vim.o.lines - 6)
 
@@ -521,15 +574,25 @@ function M.list()
   })
 end
 
--- Setup function for easy configuration
+---Setup the plugin with configuration
+---@param opts? WorktreeConfig Configuration options
 function M.setup(opts)
   opts = opts or {}
+  M.config = vim.tbl_deep_extend('force', M.config, opts)
 
   -- Create user commands
-  vim.api.nvim_create_user_command('GitWorktreeManage', M.manage, {})
-  vim.api.nvim_create_user_command('GitWorktreeSwitch', M.switch, {})
-  vim.api.nvim_create_user_command('GitWorktreeCreate', M.create_worktree, {})
-  vim.api.nvim_create_user_command('GitWorktreeList', M.list, {})
+  vim.api.nvim_create_user_command('GitWorktreeManage', M.manage, {
+    desc = 'Open git worktree manager',
+  })
+  vim.api.nvim_create_user_command('GitWorktreeSwitch', M.switch, {
+    desc = 'Quick switch between worktrees',
+  })
+  vim.api.nvim_create_user_command('GitWorktreeCreate', M.create_worktree, {
+    desc = 'Create a new worktree',
+  })
+  vim.api.nvim_create_user_command('GitWorktreeList', M.list, {
+    desc = 'List all worktrees in a floating window',
+  })
 
   -- Set up keymaps if provided
   if opts.keymaps then
