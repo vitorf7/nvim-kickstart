@@ -93,9 +93,13 @@ end
 
 ---Convert worktree path to relative path from repo container
 ---@param worktree_path string Absolute path to worktree
+---@param withContainerDir? boolean Include repo root in relative path
 ---@return string relative_path Relative path or fallback
-local function path_from_repo_container(worktree_path)
+local function path_from_repo_container(worktree_path, withContainerDir)
   local base = get_repo_container_dir()
+  if not withContainerDir then
+    base = get_repo_root_dir()
+  end
   if not base then
     return vim.fn.fnamemodify(worktree_path, ':~')
   end
@@ -180,12 +184,19 @@ end
 
 ---Format worktree for simple text display
 ---@param wt Worktree The worktree to format
+---@param withContainerDir? boolean Include repo root in relative path
 ---@return string formatted Formatted string
-local function format_worktree(wt)
+local function format_worktree(wt, withContainerDir)
   local marker = wt.current and '󰄳 ' or '  '
   local branch = wt.branch or (wt.detached and 'DETACHED') or 'bare'
+  if branch ~= 'bare' then
+    branch = ' ' .. branch
+  end
   local sha = wt.head and wt.head:sub(1, 8) or ''
-  local path = path_from_repo_container(wt.path)
+  if sha ~= '' then
+    sha = ' ' .. sha
+  end
+  local path = ' ' .. path_from_repo_container(wt.path, withContainerDir)
 
   return string.format('%s%-30s %-25s %-8s', marker, path, branch, sha)
 end
@@ -209,8 +220,8 @@ local function format_worktree_picker(item, ctx)
   -- Responsive column sizing
   local marker_w = 2
   local sha_w = 8
-  local path_w = math.max(35, math.floor(total * 0.5))
-  local branch_w = math.max(14, total - (marker_w + path_w + sha_w + 6))
+  local path_w = math.max(22, math.floor(total * 0.35))
+  local branch_w = math.max(20, total - (marker_w + path_w + sha_w + 6))
 
   -- Current worktree indicator
   if wt.current then
@@ -221,7 +232,7 @@ local function format_worktree_picker(item, ctx)
 
   -- Relative path (dimmed)
   ret[#ret + 1] = {
-    a(item.relpath, path_w, { truncate = true }),
+    a(' ' .. item.relpath, path_w, { truncate = true }),
     'Comment',
   }
 
@@ -230,7 +241,7 @@ local function format_worktree_picker(item, ctx)
   -- Branch name
   local branch = wt.branch or (wt.detached and 'DETACHED') or 'bare'
   ret[#ret + 1] = {
-    a(branch, branch_w, { truncate = true }),
+    a(' ' .. branch, branch_w, { truncate = true }),
     'SnacksPickerGitBranch',
   }
 
@@ -239,7 +250,7 @@ local function format_worktree_picker(item, ctx)
   -- Commit SHA
   local sha = wt.head and wt.head:sub(1, 8) or ''
   ret[#ret + 1] = {
-    a(sha, sha_w),
+    a(' ' .. sha, sha_w),
     'SnacksPickerGitCommit',
   }
 
@@ -268,7 +279,7 @@ local function delete_worktree(picker, worktree)
     return
   end
 
-  local display = format_worktree(worktree)
+  local display = format_worktree(worktree, true)
 
   -- Check worktree status
   local current_dir = vim.fn.getcwd()
@@ -396,7 +407,7 @@ function M.create_worktree()
 
   -- Select base branch
   vim.ui.select(clean_branches, {
-    prompt = 'Select base branch: ',
+    prompt = ' Select base branch: ',
   }, function(base_branch)
     if not base_branch then
       return
@@ -404,7 +415,7 @@ function M.create_worktree()
 
     -- Get new branch name
     vim.ui.input({
-      prompt = 'New branch name (leave empty to checkout existing): ',
+      prompt = ' New branch name (leave empty to checkout existing): ',
       default = '',
     }, function(new_branch)
       if new_branch == nil then
@@ -420,7 +431,7 @@ function M.create_worktree()
       end
 
       vim.ui.input({
-        prompt = 'Worktree directory: ',
+        prompt = ' Worktree directory: ',
         default = suggested_dir,
         completion = 'dir',
       }, function(wt_path)
@@ -468,14 +479,14 @@ function M.manage()
   for _, wt in ipairs(worktrees) do
     table.insert(items, {
       file = wt.path,
-      text = format_worktree(wt),
+      text = format_worktree(wt, false),
       worktree = wt,
-      relpath = path_from_repo_container(wt.path),
+      relpath = path_from_repo_container(wt.path, false),
     })
   end
 
   snacks.picker.pick {
-    prompt = 'Git Worktrees ',
+    prompt = ' Git Worktrees ',
     items = items,
     preview = false,
     format = format_worktree_picker,
@@ -520,14 +531,14 @@ function M.switch()
   for _, wt in ipairs(worktrees) do
     table.insert(items, {
       file = wt.path,
-      text = format_worktree(wt),
+      text = format_worktree(wt, false),
       worktree = wt,
       relpath = path_from_repo_container(wt.path),
     })
   end
 
   snacks.picker.pick {
-    prompt = 'Switch Worktree ',
+    prompt = ' Switch Worktree ',
     items = items,
     preview = false,
     format = format_worktree_picker,
@@ -549,7 +560,7 @@ function M.list()
 
   local lines = {}
   for _, wt in ipairs(worktrees) do
-    table.insert(lines, format_worktree(wt))
+    table.insert(lines, format_worktree(wt, true))
   end
 
   -- Create scratch buffer
